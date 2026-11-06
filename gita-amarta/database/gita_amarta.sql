@@ -19,6 +19,7 @@ DROP TABLE IF EXISTS layanan;
 DROP TABLE IF EXISTS kategori;
 DROP TABLE IF EXISTS admin;
 DROP TABLE IF EXISTS profil_usaha;
+DROP TABLE IF EXISTS desainer;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
@@ -71,7 +72,7 @@ CREATE TABLE portofolio (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------
--- Tabel admin (disiapkan untuk pengembangan halaman admin, belum dipakai)
+-- Tabel admin (akun untuk masuk ke panel admin: /admin/login.php)
 -- ---------------------------------------------------------------------
 CREATE TABLE admin (
   id_admin   INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -96,6 +97,22 @@ CREATE TABLE profil_usaha (
   instagram   VARCHAR(100) NULL COMMENT 'Username tanpa @',
   alamat      TEXT         NULL,
   PRIMARY KEY (id_profil)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------
+-- Tabel desainer (TAMBAHAN di luar proposal, untuk section "Tentang Desainer"
+-- di beranda). Dibuat sebagai tabel terpisah agar tabel proposal tidak berubah.
+-- Berisi 1 baris, sama seperti profil_usaha.
+-- ---------------------------------------------------------------------
+CREATE TABLE desainer (
+  id_desainer INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  nama        VARCHAR(100) NOT NULL,
+  peran       VARCHAR(100) NOT NULL,
+  bio         TEXT         NOT NULL,
+  kutipan     VARCHAR(255) NULL,
+  foto        VARCHAR(255) NULL,
+  status      ENUM('aktif','nonaktif') NOT NULL DEFAULT 'aktif' COMMENT 'nonaktif = section disembunyikan',
+  PRIMARY KEY (id_desainer)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================================
@@ -189,3 +206,16 @@ INSERT INTO profil_usaha (id_profil, nama_usaha, deskripsi, no_whatsapp, email, 
  'Studio desain grafis yang membantu UMKM dan brand lokal tampil percaya diri lewat logo, poster, kemasan, dan desain UI/UX yang rapi serta mudah diingat.',
  '6281234567890', 'halo@gitaamarta.id', 'gitaamarta.design',
  'Jl. Kaliurang Km 5, Sleman, Daerah Istimewa Yogyakarta');
+
+-- Akun admin contoh. Username: admin | Password: admin123
+-- Password disimpan sebagai hash password_hash() (bcrypt), bukan teks asli.
+-- SEGERA ganti password lewat menu "Akun Saya" setelah login pertama.
+INSERT INTO admin (id_admin, nama, username, password, email) VALUES
+(1, 'Admin Gita Amarta', 'admin', '$2y$10$/frI1ccz/ivA/EpyX7fZFuq42vGwKoc89ubIE0nGQRnrl38kBmpV6', 'halo@gitaamarta.id');
+
+-- Data desainer contoh (ubah lewat panel admin: menu "Desainer").
+INSERT INTO desainer (id_desainer, nama, peran, bio, kutipan, foto, status) VALUES
+(1, 'Gita Amarta', 'Pendiri & Desainer Grafis',
+ 'Halo! Saya desainer di balik studio ini. Saya senang membantu UMKM dan brand lokal menemukan identitas visual yang jujur, rapi, dan mudah diingat.',
+ 'Desain yang baik dimulai dari mendengarkan cerita pemilik usahanya.',
+ 'desainer.svg', 'aktif');

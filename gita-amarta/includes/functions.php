@@ -185,6 +185,23 @@ function getProfilUsaha(): array
     return $profil;
 }
 
+/**
+ * Data desainer untuk section "Tentang Desainer" di beranda (1 baris).
+ * Mengembalikan null jika tabel kosong. Status dicek oleh halaman pemanggil.
+ */
+function getDesainer(): ?array
+{
+    $stmt = getKoneksi()->prepare(
+        'SELECT id_desainer, nama, peran, bio, kutipan, foto, status
+         FROM desainer
+         ORDER BY id_desainer ASC
+         LIMIT 1'
+    );
+    $stmt->execute();
+
+    return $stmt->fetch() ?: null;
+}
+
 /* =====================================================================
  * 3. QUERY: KATEGORI
  * ===================================================================== */

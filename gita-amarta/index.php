@@ -14,19 +14,11 @@ $jumlahKategori  = count(getSemuaKategori());
 $kataJudul       = preg_split('/\s+/', trim((string) $profil['nama_usaha']));
 $kategoriKeahlian = getSemuaKategori();
 
-/*
- * Data desainer ditulis statis di sini karena tabel profil_usaha (sesuai proposal)
- * tidak punya kolom foto/bio. Ganti nilai di bawah dengan data asli,
- * dan ganti assets/img/desainer.svg dengan foto asli (nama file boleh .jpg/.png).
- */
-$desainer = [
-    'nama'  => 'Gita Amarta',
-    'peran' => 'Pendiri & Desainer Grafis',
-    'foto'  => 'desainer.svg',
-    'bio'   => 'Halo! Saya desainer di balik studio ini. Saya senang membantu UMKM dan brand lokal '
-             . 'menemukan identitas visual yang jujur, rapi, dan mudah diingat.',
-    'kutip' => 'Desain yang baik dimulai dari mendengarkan cerita pemilik usahanya.',
-];
+// Data desainer dikelola dari panel admin (menu "Desainer"). Section disembunyikan jika nonaktif/kosong.
+$desainer = getDesainer();
+if ($desainer !== null && $desainer['status'] !== 'aktif') {
+    $desainer = null;
+}
 
 $judulHalaman = 'Beranda';
 $halamanAktif = 'beranda';
@@ -136,6 +128,7 @@ require __DIR__ . '/includes/header.php';
 </section>
 
 <!-- ================= TENTANG DESAINER ================= -->
+<?php if ($desainer !== null): ?>
 <section class="section about" aria-labelledby="judul-tentang">
     <div class="container about-grid">
         <figure class="about-photo reveal">
@@ -155,9 +148,11 @@ require __DIR__ . '/includes/header.php';
             <h2 class="section-title" id="judul-tentang">Kenalan dulu dengan yang mendesain</h2>
             <p class="about-bio"><?= e($desainer['bio']) ?></p>
 
-            <blockquote class="about-quote">
-                <p>“<?= e($desainer['kutip']) ?>”</p>
-            </blockquote>
+            <?php if ((string) $desainer['kutipan'] !== ''): ?>
+                <blockquote class="about-quote">
+                    <p>“<?= e($desainer['kutipan']) ?>”</p>
+                </blockquote>
+            <?php endif; ?>
 
             <?php if ($kategoriKeahlian): ?>
                 <ul class="about-skills" aria-label="Bidang keahlian">
@@ -171,6 +166,7 @@ require __DIR__ . '/includes/header.php';
         </div>
     </div>
 </section>
+<?php endif; ?>
 
 <!-- ================= CARA PESAN ================= -->
 <section class="section section--tint" id="cara-pesan">
