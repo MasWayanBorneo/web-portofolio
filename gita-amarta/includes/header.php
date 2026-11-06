@@ -14,6 +14,8 @@ $profil           = getProfilUsaha();
 $judulHalaman     = $judulHalaman ?? 'Beranda';
 $halamanAktif     = $halamanAktif ?? '';
 $deskripsiHalaman = $deskripsiHalaman ?? (string) $profil['deskripsi'];
+$tampilan         = getTampilan();          // tema & warna yang dipilih admin
+$cssTema          = cssTema($tampilan);     // '' jika memakai tema bawaan
 
 $menu = [
     ['kunci' => 'beranda',    'label' => 'Beranda',    'url' => 'index.php'],
@@ -30,17 +32,21 @@ $menu = [
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= e($judulHalaman) ?> | <?= e($profil['nama_usaha']) ?> – Jasa Desain Grafis</title>
     <meta name="description" content="<?= e($deskripsiHalaman) ?>">
-    <meta name="theme-color" content="#FFF8F0">
-    <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml">
+    <meta name="theme-color" content="<?= e(variabelCssTema($tampilan)['--bg']) ?>">
+    <link rel="icon" href="<?= e(urlLogo()) ?>">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="<?= e(urlAset('assets/css/style.css')) ?>">
+    <?php if ($cssTema !== ''): ?>
+        <!-- Warna tema dari panel admin (menimpa warna bawaan di style.css). -->
+        <style><?= $cssTema ?></style>
+    <?php endif; ?>
 
     <!-- Penanda bahwa JavaScript aktif, dipakai CSS untuk animasi yang butuh JS. -->
     <script>document.documentElement.classList.add('js');</script>
-    <script src="assets/js/main.js" defer></script>
+    <script src="<?= e(urlAset('assets/js/main.js')) ?>" defer></script>
 </head>
 <body>
 <a class="skip-link" href="#konten">Langsung ke konten</a>
@@ -48,7 +54,7 @@ $menu = [
 <header class="site-header" data-header>
     <div class="container nav-bar">
         <a class="brand" href="index.php" aria-label="<?= e($profil['nama_usaha']) ?> – ke beranda">
-            <img src="assets/img/logo.svg" width="40" height="40" alt="">
+            <img src="<?= e(urlLogo()) ?>" width="40" height="40" alt="">
             <span><?= e($profil['nama_usaha']) ?></span>
         </a>
 

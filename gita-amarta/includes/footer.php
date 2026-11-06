@@ -14,7 +14,7 @@ $linkWaUmum  = linkWhatsApp((string) $profil['no_whatsapp'], $pesanSapaan);
     <div class="container footer-grid">
         <div class="footer-brand">
             <a class="brand brand--light" href="index.php">
-                <img src="assets/img/logo.svg" width="40" height="40" alt="">
+                <img src="<?= e(urlLogo()) ?>" width="40" height="40" alt="">
                 <span><?= e($profil['nama_usaha']) ?></span>
             </a>
             <p><?= e($profil['deskripsi']) ?></p>

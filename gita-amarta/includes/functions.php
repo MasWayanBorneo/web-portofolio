@@ -60,6 +60,57 @@ function formatTanggal(string $tanggal): string
 }
 
 /**
+ * URL file CSS/JS dengan penanda versi, contoh "assets/css/style.css?v=1762440615".
+ * Angka versi = waktu file terakhir diubah, jadi setiap kali file diubah browser
+ * otomatis memuat versi baru (tidak memakai salinan lama dari cache).
+ *
+ * $path relatif terhadap folder halaman; $folderHalaman adalah folder tersebut di server.
+ */
+function urlAset(string $path, string $folderHalaman = __DIR__ . '/..'): string
+{
+    $file = $folderHalaman . '/' . $path;
+
+    return $path . '?v=' . (is_file($file) ? filemtime($file) : 0);
+}
+
+/**
+ * Ukuran asli gambar [lebar, tinggi] untuk atribut width/height pada <img>.
+ * Dengan ukuran yang benar, browser menyiapkan ruang yang pas sebelum gambar dimuat,
+ * sehingga galeri masonry tidak "meloncat" saat gambar selesai diunduh.
+ * Jika ukuran tidak bisa dibaca, dipakai 800×600 (ukuran gambar contoh & placeholder).
+ */
+function ukuranGambar(?string $namaFile): array
+{
+    static $cache = [];
+
+    $nama = basename((string) $namaFile);
+    if (isset($cache[$nama])) {
+        return $cache[$nama];
+    }
+
+    $ukuran = [800, 600];
+    $path   = __DIR__ . '/../assets/img/' . $nama;
+
+    if ($nama !== '' && is_file($path)) {
+        if (str_ends_with(strtolower($nama), '.svg')) {
+            // SVG: ambil lebar & tinggi dari viewBox="x y lebar tinggi".
+            $awal = (string) file_get_contents($path, false, null, 0, 2048);
+            if (preg_match('/viewBox="\s*[-\d.]+[\s,]+[-\d.]+[\s,]+([\d.]+)[\s,]+([\d.]+)/i', $awal, $m)) {
+                $ukuran = [(int) round((float) $m[1]), (int) round((float) $m[2])];
+            }
+        } elseif (($info = @getimagesize($path)) !== false) {
+            $ukuran = [(int) $info[0], (int) $info[1]];
+        }
+    }
+
+    if ($ukuran[0] <= 0 || $ukuran[1] <= 0) {
+        $ukuran = [800, 600];
+    }
+
+    return $cache[$nama] = $ukuran;
+}
+
+/**
  * Mengembalikan URL gambar di folder assets/img.
  * Jika nama file kosong atau file tidak ada, dipakai gambar placeholder.
  */
@@ -183,6 +234,23 @@ function getProfilUsaha(): array
     }
 
     return $profil;
+}
+
+/**
+ * Data desainer untuk section "Tentang Desainer" di beranda (1 baris).
+ * Mengembalikan null jika tabel kosong. Status dicek oleh halaman pemanggil.
+ */
+function getDesainer(): ?array
+{
+    $stmt = getKoneksi()->prepare(
+        'SELECT id_desainer, nama, peran, bio, kutipan, foto, status
+         FROM desainer
+         ORDER BY id_desainer ASC
+         LIMIT 1'
+    );
+    $stmt->execute();
+
+    return $stmt->fetch() ?: null;
 }
 
 /* =====================================================================
@@ -476,4 +544,207 @@ function ambilFlashPesanan(int $idLayanan): array
     }
 
     return ['error' => $flash['error'], 'isian' => $flash['isian']];
+}
+
+/* =====================================================================
+ * 7. TAMPILAN: TEMA & WARNA WEBSITE
+ * Admin memilih tema bawaan atau warna kustom (tabel "tampilan").
+ * Warna turunan (versi gelap, versi lembut, abu-abu teks) dihitung otomatis
+ * agar admin cukup mengatur 5 warna utama.
+ * ===================================================================== */
+
+/** Nama kolom warna di tabel tampilan, urut seperti di form admin. */
+const KOLOM_WARNA = ['warna_utama', 'warna_aksen', 'warna_sorot', 'warna_latar', 'warna_teks'];
+
+/**
+ * Tema bawaan. Semua sudah lolos cek kontras WCAG AA (lihat cekKontrasTema()).
+ */
+function daftarTema(): array
+{
+    return [
+        'ungu-koral' => [
+            'nama' => 'Ungu Koral (bawaan)',
+            'warna_utama' => '#6C4CF1', 'warna_aksen' => '#FF7A59', 'warna_sorot' => '#FFC94A',
+            'warna_latar' => '#FFF8F0', 'warna_teks' => '#1A1B3A',
+        ],
+        'biru-laut' => [
+            'nama' => 'Biru Laut',
+            'warna_utama' => '#2457D6', 'warna_aksen' => '#FF8A3D', 'warna_sorot' => '#FFD43B',
+            'warna_latar' => '#F4F7FF', 'warna_teks' => '#0E1A3A',
+        ],
+        'hijau-toska' => [
+            'nama' => 'Hijau Toska',
+            'warna_utama' => '#0F766E', 'warna_aksen' => '#F59E0B', 'warna_sorot' => '#FDE047',
+            'warna_latar' => '#F2FAF7', 'warna_teks' => '#0B2A26',
+        ],
+        'terakota' => [
+            'nama' => 'Terakota',
+            'warna_utama' => '#B23A2B', 'warna_aksen' => '#2A9D8F', 'warna_sorot' => '#F4C95D',
+            'warna_latar' => '#FFF5EF', 'warna_teks' => '#2A1714',
+        ],
+        'monokrom' => [
+            'nama' => 'Monokrom',
+            'warna_utama' => '#26262B', 'warna_aksen' => '#FF5A36', 'warna_sorot' => '#FFD23F',
+            'warna_latar' => '#FAFAF7', 'warna_teks' => '#151518',
+        ],
+    ];
+}
+
+/**
+ * Pengaturan tampilan yang sedang dipakai. Jika tabel kosong, dipakai tema bawaan.
+ */
+function getTampilan(): array
+{
+    static $tampilan = null;
+
+    if ($tampilan === null) {
+        $stmt = getKoneksi()->prepare(
+            'SELECT id_tampilan, tema, warna_utama, warna_aksen, warna_sorot, warna_latar, warna_teks, logo
+             FROM tampilan
+             ORDER BY id_tampilan ASC
+             LIMIT 1'
+        );
+        $stmt->execute();
+
+        $tampilan = $stmt->fetch()
+            ?: ['id_tampilan' => 0, 'tema' => 'ungu-koral', 'logo' => null] + daftarTema()['ungu-koral'];
+    }
+
+    return $tampilan;
+}
+
+/** Logo bawaan jika admin belum mengunggah logo. */
+const LOGO_BAWAAN = 'logo.svg';
+
+/**
+ * URL logo website (navbar, footer, favicon). Jika logo unggahan kosong atau
+ * filenya hilang, dipakai logo bawaan. Dari folder admin, tambahkan '../' di depannya.
+ */
+function urlLogo(): string
+{
+    $logo = basename((string) (getTampilan()['logo'] ?? ''));
+
+    if ($logo !== '' && is_file(__DIR__ . '/../assets/img/' . $logo)) {
+        return 'assets/img/' . rawurlencode($logo);
+    }
+
+    return 'assets/img/' . LOGO_BAWAAN;
+}
+
+function warnaHexValid(string $hex): bool
+{
+    return preg_match('/^#[0-9A-Fa-f]{6}$/', $hex) === 1;
+}
+
+/** "#6C4CF1" -> [108, 76, 241] */
+function hexKeRgb(string $hex): array
+{
+    return [hexdec(substr($hex, 1, 2)), hexdec(substr($hex, 3, 2)), hexdec(substr($hex, 5, 2))];
+}
+
+/** [108, 76, 241] -> "#6C4CF1" */
+function rgbKeHex(array $rgb): string
+{
+    $rgb = array_map(static fn ($nilai): int => (int) round(max(0, min(255, $nilai))), $rgb);
+
+    return sprintf('#%02X%02X%02X', ...$rgb);
+}
+
+/**
+ * Mencampur dua warna. $porsiB = 0 berarti warna A murni, 1 berarti warna B murni.
+ */
+function campurWarna(string $a, string $b, float $porsiB): string
+{
+    $rgbA = hexKeRgb($a);
+    $rgbB = hexKeRgb($b);
+
+    return rgbKeHex([
+        $rgbA[0] + ($rgbB[0] - $rgbA[0]) * $porsiB,
+        $rgbA[1] + ($rgbB[1] - $rgbA[1]) * $porsiB,
+        $rgbA[2] + ($rgbB[2] - $rgbA[2]) * $porsiB,
+    ]);
+}
+
+/**
+ * Luminansi relatif menurut rumus WCAG 2 (0 = hitam, 1 = putih).
+ */
+function luminansi(string $hex): float
+{
+    $kanal = array_map(static function (int $nilai): float {
+        $c = $nilai / 255;
+        return $c <= 0.03928 ? $c / 12.92 : (($c + 0.055) / 1.055) ** 2.4;
+    }, hexKeRgb($hex));
+
+    return 0.2126 * $kanal[0] + 0.7152 * $kanal[1] + 0.0722 * $kanal[2];
+}
+
+/**
+ * Rasio kontras dua warna (1 sampai 21). WCAG AA: teks biasa >= 4.5, teks besar/ikon >= 3.
+ */
+function rasioKontras(string $a, string $b): float
+{
+    $terang = max(luminansi($a), luminansi($b));
+    $gelap  = min(luminansi($a), luminansi($b));
+
+    return ($terang + 0.05) / ($gelap + 0.05);
+}
+
+/**
+ * Semua variabel CSS yang dihasilkan dari 5 warna tema.
+ */
+function variabelCssTema(array $tema): array
+{
+    $warna = [];
+    $bawaan = daftarTema()['ungu-koral'];
+    foreach (KOLOM_WARNA as $kolom) {
+        $nilai = (string) ($tema[$kolom] ?? '');
+        $warna[$kolom] = warnaHexValid($nilai) ? strtoupper($nilai) : $bawaan[$kolom];
+    }
+
+    $rgb = static fn (string $hex): string => implode(', ', hexKeRgb($hex));
+
+    return [
+        '--bg'           => $warna['warna_latar'],
+        '--ink'          => $warna['warna_teks'],
+        '--primary'      => $warna['warna_utama'],
+        '--accent'       => $warna['warna_aksen'],
+        '--sun'          => $warna['warna_sorot'],
+        '--muted'        => campurWarna($warna['warna_teks'], $warna['warna_latar'], 0.35),
+        '--primary-dark' => campurWarna($warna['warna_utama'], '#000000', 0.18),
+        '--primary-soft' => campurWarna($warna['warna_utama'], '#FFFFFF', 0.90),
+        '--field-border' => campurWarna($warna['warna_teks'], '#FFFFFF', 0.50),
+        '--bg-rgb'       => $rgb($warna['warna_latar']),
+        '--ink-rgb'      => $rgb($warna['warna_teks']),
+        '--primary-rgb'  => $rgb($warna['warna_utama']),
+        '--accent-rgb'   => $rgb($warna['warna_aksen']),
+        '--sun-rgb'      => $rgb($warna['warna_sorot']),
+    ];
+}
+
+/**
+ * Isi <style> untuk menimpa warna bawaan di style.css.
+ * Mengembalikan string kosong jika warna sama persis dengan tema bawaan
+ * (nilai di style.css sudah dipakai, tidak perlu ditimpa).
+ */
+function cssTema(array $tema): string
+{
+    $bawaan = daftarTema()['ungu-koral'];
+    $samaDenganBawaan = true;
+    foreach (KOLOM_WARNA as $kolom) {
+        if (strcasecmp((string) ($tema[$kolom] ?? ''), $bawaan[$kolom]) !== 0) {
+            $samaDenganBawaan = false;
+        }
+    }
+
+    if ($samaDenganBawaan) {
+        return '';
+    }
+
+    // Aman dicetak tanpa escape: semua nilai berasal dari warnaHexValid() atau hasil hitungan angka.
+    $baris = [];
+    foreach (variabelCssTema($tema) as $nama => $nilai) {
+        $baris[] = $nama . ': ' . $nilai . ';';
+    }
+
+    return ':root { ' . implode(' ', $baris) . ' }';
 }

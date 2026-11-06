@@ -74,9 +74,10 @@ require __DIR__ . '/includes/header.php';
                    data-kategori-nama="<?= e($karya['nama_kategori']) ?>"
                    data-tanggal="<?= e(formatTanggal($karya['tanggal'])) ?>"
                    data-deskripsi="<?= e($karya['deskripsi']) ?>"<?= $cocok ? '' : ' hidden' ?>>
+                    <?php [$lebar, $tinggi] = ukuranGambar($karya['gambar']); ?>
                     <span class="porto-media">
                         <img src="<?= e(urlGambar($karya['gambar'])) ?>" alt="<?= e($karya['judul']) ?>"
-                             width="800" height="600" loading="lazy">
+                             width="<?= e($lebar) ?>" height="<?= e($tinggi) ?>" loading="lazy">
                         <span class="porto-zoom" aria-hidden="true"><?= ikon('perbesar') ?></span>
                     </span>
                     <span class="porto-caption">
