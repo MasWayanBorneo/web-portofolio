@@ -8,11 +8,6 @@ SET NAMES utf8mb4;
 SET time_zone = '+07:00';
 SET FOREIGN_KEY_CHECKS = 0;
 
-CREATE DATABASE IF NOT EXISTS gita_amarta
-  CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;
-
-USE gita_amarta;
 
 DROP TABLE IF EXISTS portofolio;
 DROP TABLE IF EXISTS layanan;
@@ -20,6 +15,7 @@ DROP TABLE IF EXISTS kategori;
 DROP TABLE IF EXISTS admin;
 DROP TABLE IF EXISTS profil_usaha;
 DROP TABLE IF EXISTS desainer;
+DROP TABLE IF EXISTS tampilan;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
@@ -113,6 +109,21 @@ CREATE TABLE desainer (
   foto        VARCHAR(255) NULL,
   status      ENUM('aktif','nonaktif') NOT NULL DEFAULT 'aktif' COMMENT 'nonaktif = section disembunyikan',
   PRIMARY KEY (id_desainer)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------
+-- Tabel tampilan (TAMBAHAN di luar proposal): tema & warna website
+-- yang diatur admin. Berisi 1 baris. Warna disimpan dalam format #RRGGBB.
+-- ---------------------------------------------------------------------
+CREATE TABLE tampilan (
+  id_tampilan INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  tema        VARCHAR(30)  NOT NULL DEFAULT 'ungu-koral' COMMENT 'kunci tema bawaan, atau "kustom"',
+  warna_utama CHAR(7)      NOT NULL COMMENT 'tombol, link, judul berwarna',
+  warna_aksen CHAR(7)      NOT NULL COMMENT 'aksen kedua (koral)',
+  warna_sorot CHAR(7)      NOT NULL COMMENT 'aksen kecil (kuning)',
+  warna_latar CHAR(7)      NOT NULL COMMENT 'latar halaman, harus terang',
+  warna_teks  CHAR(7)      NOT NULL COMMENT 'teks utama & footer',
+  PRIMARY KEY (id_tampilan)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================================
@@ -219,3 +230,7 @@ INSERT INTO desainer (id_desainer, nama, peran, bio, kutipan, foto, status) VALU
  'Halo! Saya desainer di balik studio ini. Saya senang membantu UMKM dan brand lokal menemukan identitas visual yang jujur, rapi, dan mudah diingat.',
  'Desain yang baik dimulai dari mendengarkan cerita pemilik usahanya.',
  'desainer.svg', 'aktif');
+
+-- Tema bawaan (ubah lewat panel admin: menu "Tampilan").
+INSERT INTO tampilan (id_tampilan, tema, warna_utama, warna_aksen, warna_sorot, warna_latar, warna_teks) VALUES
+(1, 'ungu-koral', '#6C4CF1', '#FF7A59', '#FFC94A', '#FFF8F0', '#1A1B3A');

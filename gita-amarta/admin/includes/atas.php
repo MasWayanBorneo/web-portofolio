@@ -5,13 +5,21 @@
  * Variabel yang wajib ada sebelum file ini di-include:
  *   $admin        (array)  hasil wajibLogin()
  *   $judulHalaman (string) judul halaman, contoh 'Layanan'
- *   $menuAktif    (string) kunci menu yang disorot: dashboard | layanan | portofolio | kategori | profil | desainer | akun
+ *   $menuAktif    (string) kunci menu yang disorot: dashboard | layanan | portofolio | kategori | profil | desainer | tampilan | akun
  * Opsional:
  *   $breadcrumb   (array)  [['label' => 'Layanan', 'url' => 'layanan.php'], ['label' => 'Tambah']]
  */
 
+/*
+ * Anotasi untuk editor (Intelephense): variabel ini dibuat oleh halaman yang
+ * meng-include file ini, bukan di file ini sendiri. Tidak memengaruhi jalannya program.
+ */
+/** @var array  $admin */
+/** @var string $judulHalaman */
+/** @var string $menuAktif */
+
 $profilUsaha = getProfilUsaha();
-$breadcrumb  = $breadcrumb ?? [['label' => $judulHalaman]];
+$breadcrumb ??= [['label' => $judulHalaman]];
 
 $menuAdmin = [
     ['kunci' => 'dashboard', 'label' => 'Dashboard', 'url' => 'index.php', 'ikon' => 'bi-speedometer2'],
@@ -22,6 +30,7 @@ $menuAdmin = [
     ['judul' => 'Pengaturan'],
     ['kunci' => 'profil',   'label' => 'Profil Usaha', 'url' => 'profil.php',   'ikon' => 'bi-shop'],
     ['kunci' => 'desainer', 'label' => 'Desainer',     'url' => 'desainer.php', 'ikon' => 'bi-person-badge'],
+    ['kunci' => 'tampilan', 'label' => 'Tampilan',     'url' => 'tampilan.php', 'ikon' => 'bi-palette'],
     ['kunci' => 'akun',   'label' => 'Akun Saya',    'url' => 'akun.php',   'ikon' => 'bi-person-gear'],
 ];
 ?>

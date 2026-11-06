@@ -2,6 +2,8 @@
 /**
  * Bagian bawah halaman admin: penutup konten, footer, dan script.
  */
+
+/** @var array $profilUsaha  dibuat di atas.php */
 ?>
             </div>
         </div>

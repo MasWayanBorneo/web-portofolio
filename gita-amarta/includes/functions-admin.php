@@ -661,7 +661,130 @@ function simpanDesainer(int $idDesainer, array $data, ?string $foto): void
 }
 
 /* =====================================================================
- * 9. UNGGAH & HAPUS GAMBAR
+ * 9. QUERY: TAMPILAN (tema & warna website)
+ * ===================================================================== */
+
+function ambilInputTampilan(array $post): array
+{
+    $data = ['tema' => ambilTeks($post, 'tema')];
+
+    foreach (KOLOM_WARNA as $kolom) {
+        $data[$kolom] = strtoupper(ambilTeks($post, $kolom));
+    }
+
+    // Tema bawaan: warna diambil dari daftar resmi (bukan dari input), agar tidak bisa diubah-ubah.
+    $daftar = daftarTema();
+    if (isset($daftar[$data['tema']])) {
+        foreach (KOLOM_WARNA as $kolom) {
+            $data[$kolom] = $daftar[$data['tema']][$kolom];
+        }
+    }
+
+    return $data;
+}
+
+/**
+ * Pasangan warna yang wajib terbaca (WCAG AA). Dipakai di validasi dan ditampilkan di halaman admin.
+ * Setiap baris: label, nama variabel depan & belakang (contoh '--ink'), rasio, minimal, lolos (bool).
+ */
+function cekKontrasTema(array $tema): array
+{
+    $v = variabelCssTema($tema) + ['putih' => '#FFFFFF'];
+
+    // [label, variabel warna depan, variabel warna belakang, rasio minimal]
+    $pasangan = [
+        ['Teks utama di atas latar',                '--ink',          '--bg',      4.5],
+        ['Teks abu-abu (keterangan) di atas latar', '--muted',        '--bg',      4.5],
+        ['Tulisan putih di tombol warna utama',     'putih',          '--primary', 4.5],
+        ['Link & judul kecil di atas latar',        '--primary-dark', '--bg',      4.5],
+        ['Angka langkah di atas warna aksen',       '--ink',          '--accent',  3.0],
+        ['Ikon & link warna sorot di footer',       '--sun',          '--ink',     3.0],
+    ];
+
+    $hasil = [];
+    foreach ($pasangan as [$label, $depan, $belakang, $minimal]) {
+        $rasio   = rasioKontras($v[$depan], $v[$belakang]);
+        $hasil[] = [
+            'label'    => $label,
+            'depan'    => $depan,
+            'belakang' => $belakang,
+            'rasio'    => $rasio,
+            'minimal'  => $minimal,
+            'lolos'    => $rasio >= $minimal,
+        ];
+    }
+
+    return $hasil;
+}
+
+function validasiTampilan(array $data): array
+{
+    $error = [];
+
+    if ($data['tema'] !== 'kustom' && !isset(daftarTema()[$data['tema']])) {
+        $error['tema'] = 'Pilih salah satu tema.';
+        return $error;
+    }
+
+    foreach (KOLOM_WARNA as $kolom) {
+        if (!warnaHexValid($data[$kolom])) {
+            $error[$kolom] = 'Warna harus berformat #RRGGBB, contoh #6C4CF1.';
+        }
+    }
+
+    if ($error) {
+        return $error;
+    }
+
+    // Website hanya punya satu tema terang (kartu tetap putih), jadi latar harus terang.
+    if (luminansi($data['warna_latar']) < 0.8) {
+        $error['warna_latar'] = 'Warna latar terlalu gelap. Pilih warna yang terang (mendekati putih/krem).';
+    }
+
+    foreach (cekKontrasTema($data) as $cek) {
+        if (!$cek['lolos']) {
+            $error['kontras'][] = $cek['label'] . ': kontras ' . number_format($cek['rasio'], 2, ',', '')
+                . ':1, minimal ' . number_format($cek['minimal'], 1, ',', '') . ':1.';
+        }
+    }
+
+    return $error;
+}
+
+/**
+ * Menyimpan tema. Jika tabel masih kosong ($idTampilan = 0), baris baru dibuat.
+ */
+function simpanTampilan(int $idTampilan, array $data): void
+{
+    $parameter = [
+        ':tema'   => $data['tema'],
+        ':utama'  => $data['warna_utama'],
+        ':aksen'  => $data['warna_aksen'],
+        ':sorot'  => $data['warna_sorot'],
+        ':latar'  => $data['warna_latar'],
+        ':teks'   => $data['warna_teks'],
+    ];
+
+    if ($idTampilan > 0) {
+        $stmt = getKoneksi()->prepare(
+            'UPDATE tampilan
+             SET tema = :tema, warna_utama = :utama, warna_aksen = :aksen, warna_sorot = :sorot,
+                 warna_latar = :latar, warna_teks = :teks
+             WHERE id_tampilan = :id'
+        );
+        $parameter[':id'] = $idTampilan;
+    } else {
+        $stmt = getKoneksi()->prepare(
+            'INSERT INTO tampilan (tema, warna_utama, warna_aksen, warna_sorot, warna_latar, warna_teks)
+             VALUES (:tema, :utama, :aksen, :sorot, :latar, :teks)'
+        );
+    }
+
+    $stmt->execute($parameter);
+}
+
+/* =====================================================================
+ * 10. UNGGAH & HAPUS GAMBAR
  * ===================================================================== */
 
 /**
