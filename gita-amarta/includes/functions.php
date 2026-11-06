@@ -60,6 +60,57 @@ function formatTanggal(string $tanggal): string
 }
 
 /**
+ * URL file CSS/JS dengan penanda versi, contoh "assets/css/style.css?v=1762440615".
+ * Angka versi = waktu file terakhir diubah, jadi setiap kali file diubah browser
+ * otomatis memuat versi baru (tidak memakai salinan lama dari cache).
+ *
+ * $path relatif terhadap folder halaman; $folderHalaman adalah folder tersebut di server.
+ */
+function urlAset(string $path, string $folderHalaman = __DIR__ . '/..'): string
+{
+    $file = $folderHalaman . '/' . $path;
+
+    return $path . '?v=' . (is_file($file) ? filemtime($file) : 0);
+}
+
+/**
+ * Ukuran asli gambar [lebar, tinggi] untuk atribut width/height pada <img>.
+ * Dengan ukuran yang benar, browser menyiapkan ruang yang pas sebelum gambar dimuat,
+ * sehingga galeri masonry tidak "meloncat" saat gambar selesai diunduh.
+ * Jika ukuran tidak bisa dibaca, dipakai 800×600 (ukuran gambar contoh & placeholder).
+ */
+function ukuranGambar(?string $namaFile): array
+{
+    static $cache = [];
+
+    $nama = basename((string) $namaFile);
+    if (isset($cache[$nama])) {
+        return $cache[$nama];
+    }
+
+    $ukuran = [800, 600];
+    $path   = __DIR__ . '/../assets/img/' . $nama;
+
+    if ($nama !== '' && is_file($path)) {
+        if (str_ends_with(strtolower($nama), '.svg')) {
+            // SVG: ambil lebar & tinggi dari viewBox="x y lebar tinggi".
+            $awal = (string) file_get_contents($path, false, null, 0, 2048);
+            if (preg_match('/viewBox="\s*[-\d.]+[\s,]+[-\d.]+[\s,]+([\d.]+)[\s,]+([\d.]+)/i', $awal, $m)) {
+                $ukuran = [(int) round((float) $m[1]), (int) round((float) $m[2])];
+            }
+        } elseif (($info = @getimagesize($path)) !== false) {
+            $ukuran = [(int) $info[0], (int) $info[1]];
+        }
+    }
+
+    if ($ukuran[0] <= 0 || $ukuran[1] <= 0) {
+        $ukuran = [800, 600];
+    }
+
+    return $cache[$nama] = $ukuran;
+}
+
+/**
  * Mengembalikan URL gambar di folder assets/img.
  * Jika nama file kosong atau file tidak ada, dipakai gambar placeholder.
  */
@@ -548,17 +599,36 @@ function getTampilan(): array
 
     if ($tampilan === null) {
         $stmt = getKoneksi()->prepare(
-            'SELECT id_tampilan, tema, warna_utama, warna_aksen, warna_sorot, warna_latar, warna_teks
+            'SELECT id_tampilan, tema, warna_utama, warna_aksen, warna_sorot, warna_latar, warna_teks, logo
              FROM tampilan
              ORDER BY id_tampilan ASC
              LIMIT 1'
         );
         $stmt->execute();
 
-        $tampilan = $stmt->fetch() ?: ['id_tampilan' => 0, 'tema' => 'ungu-koral'] + daftarTema()['ungu-koral'];
+        $tampilan = $stmt->fetch()
+            ?: ['id_tampilan' => 0, 'tema' => 'ungu-koral', 'logo' => null] + daftarTema()['ungu-koral'];
     }
 
     return $tampilan;
+}
+
+/** Logo bawaan jika admin belum mengunggah logo. */
+const LOGO_BAWAAN = 'logo.svg';
+
+/**
+ * URL logo website (navbar, footer, favicon). Jika logo unggahan kosong atau
+ * filenya hilang, dipakai logo bawaan. Dari folder admin, tambahkan '../' di depannya.
+ */
+function urlLogo(): string
+{
+    $logo = basename((string) (getTampilan()['logo'] ?? ''));
+
+    if ($logo !== '' && is_file(__DIR__ . '/../assets/img/' . $logo)) {
+        return 'assets/img/' . rawurlencode($logo);
+    }
+
+    return 'assets/img/' . LOGO_BAWAAN;
 }
 
 function warnaHexValid(string $hex): bool

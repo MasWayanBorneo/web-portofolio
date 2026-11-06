@@ -42,14 +42,14 @@ $menuAdmin = [
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
     <title><?= e($judulHalaman) ?> | Admin <?= e($profilUsaha['nama_usaha']) ?></title>
-    <link rel="icon" href="../assets/img/logo.svg" type="image/svg+xml">
+    <link rel="icon" href="<?= e('../' . urlLogo()) ?>">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" crossorigin="anonymous">
-    <link rel="stylesheet" href="assets/adminlte/adminlte.min.css">
-    <link rel="stylesheet" href="assets/admin.css">
+    <link rel="stylesheet" href="<?= e(urlAset('assets/adminlte/adminlte.min.css', __DIR__ . '/..')) ?>">
+    <link rel="stylesheet" href="<?= e(urlAset('assets/admin.css', __DIR__ . '/..')) ?>">
 </head>
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
 <div class="app-wrapper">
@@ -100,7 +100,7 @@ $menuAdmin = [
     <aside class="app-sidebar shadow" data-bs-theme="dark">
         <div class="sidebar-brand">
             <a href="index.php" class="brand-link">
-                <img src="../assets/img/logo.svg" alt="" class="brand-image" width="33" height="33">
+                <img src="<?= e('../' . urlLogo()) ?>" alt="" class="brand-image" width="33" height="33">
                 <span class="brand-text fw-bold"><?= e($profilUsaha['nama_usaha']) ?></span>
             </a>
         </div>

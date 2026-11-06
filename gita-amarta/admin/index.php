@@ -56,7 +56,7 @@ $kotakRingkasan = [
                     <ul class="list-group list-group-flush">
                         <?php foreach ($karyaTerbaru as $karya): ?>
                             <li class="list-group-item d-flex align-items-center gap-3">
-                                <img src="<?= e(urlGambarAdmin($karya['gambar'])) ?>" alt="" class="thumb" width="64" height="48" loading="lazy">
+                                <img src="<?= e(urlGambarAdmin($karya['gambar'])) ?>" alt="" class="thumb gambar-utuh" width="64" height="48" loading="lazy">
                                 <div class="flex-grow-1 min-w-0">
                                     <a href="portofolio-form.php?id=<?= e($karya['id_portofolio']) ?>" class="fw-semibold text-decoration-none d-block text-truncate">
                                         <?= e($karya['judul']) ?>

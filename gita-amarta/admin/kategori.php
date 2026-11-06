@@ -26,9 +26,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($kategori === null) {
             setFlash('danger', 'Kategori tidak ditemukan.');
-        } elseif (($dipakai = hitungPemakaianKategori($idHapus)) > 0) {
-            setFlash('warning', 'Kategori "' . $kategori['nama_kategori'] . '" masih dipakai oleh ' . $dipakai
-                . ' layanan/karya. Pindahkan atau hapus data tersebut terlebih dahulu.');
+        } elseif (hitungPemakaianKategori($idHapus) > 0) {
+            // Masih ada isinya: admin harus memilih dulu isinya dipindah atau ikut dihapus.
+            redirect('kategori-hapus.php?id=' . $idHapus);
         } else {
             hapusKategori($idHapus);
             setFlash('success', 'Kategori "' . $kategori['nama_kategori'] . '" sudah dihapus.');
@@ -101,16 +101,24 @@ require __DIR__ . '/includes/atas.php';
                                     <td class="text-end text-nowrap">
                                         <a href="kategori.php?edit=<?= e($kategori['id_kategori']) ?>" class="btn btn-outline-primary btn-sm"
                                            aria-label="Edit <?= e($kategori['nama_kategori']) ?>"><i class="bi bi-pencil"></i></a>
-                                        <form action="kategori.php" method="post" class="d-inline"
-                                              data-konfirmasi="Hapus kategori &quot;<?= e($kategori['nama_kategori']) ?>&quot;?">
-                                            <?= inputCsrf() ?>
-                                            <input type="hidden" name="aksi" value="hapus">
-                                            <input type="hidden" name="id_kategori" value="<?= e($kategori['id_kategori']) ?>">
-                                            <button type="submit" class="btn btn-outline-danger btn-sm"<?= $dipakai > 0 ? ' disabled title="Masih dipakai, tidak bisa dihapus"' : '' ?>
-                                                    aria-label="Hapus <?= e($kategori['nama_kategori']) ?>">
+                                        <?php if ($dipakai > 0): ?>
+                                            <!-- Masih dipakai: buka halaman konfirmasi (pindahkan isi atau hapus semua). -->
+                                            <a href="kategori-hapus.php?id=<?= e($kategori['id_kategori']) ?>" class="btn btn-outline-danger btn-sm"
+                                               title="Hapus (masih dipakai <?= e($dipakai) ?> layanan/karya)"
+                                               aria-label="Hapus <?= e($kategori['nama_kategori']) ?>">
                                                 <i class="bi bi-trash"></i>
-                                            </button>
-                                        </form>
+                                            </a>
+                                        <?php else: ?>
+                                            <form action="kategori.php" method="post" class="d-inline"
+                                                  data-konfirmasi="Hapus kategori &quot;<?= e($kategori['nama_kategori']) ?>&quot;?">
+                                                <?= inputCsrf() ?>
+                                                <input type="hidden" name="aksi" value="hapus">
+                                                <input type="hidden" name="id_kategori" value="<?= e($kategori['id_kategori']) ?>">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm" aria-label="Hapus <?= e($kategori['nama_kategori']) ?>">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        <?php endif; ?>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -119,7 +127,8 @@ require __DIR__ . '/includes/atas.php';
                 </div>
             </div>
             <div class="card-footer small text-body-secondary">
-                <i class="bi bi-info-circle"></i> Kategori yang masih dipakai layanan atau karya tidak bisa dihapus.
+                <i class="bi bi-info-circle"></i> Saat menghapus kategori yang masih berisi layanan atau karya,
+                kamu akan diminta memilih: pindahkan isinya ke kategori lain, atau hapus semuanya.
             </div>
         </div>
     </div>

@@ -112,7 +112,7 @@ CREATE TABLE desainer (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------
--- Tabel tampilan (TAMBAHAN di luar proposal): tema & warna website
+-- Tabel tampilan (TAMBAHAN di luar proposal): tema, warna, dan logo website
 -- yang diatur admin. Berisi 1 baris. Warna disimpan dalam format #RRGGBB.
 -- ---------------------------------------------------------------------
 CREATE TABLE tampilan (
@@ -123,6 +123,7 @@ CREATE TABLE tampilan (
   warna_sorot CHAR(7)      NOT NULL COMMENT 'aksen kecil (kuning)',
   warna_latar CHAR(7)      NOT NULL COMMENT 'latar halaman, harus terang',
   warna_teks  CHAR(7)      NOT NULL COMMENT 'teks utama & footer',
+  logo        VARCHAR(255) NULL     COMMENT 'file logo unggahan; NULL = logo bawaan (logo.svg)',
   PRIMARY KEY (id_tampilan)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

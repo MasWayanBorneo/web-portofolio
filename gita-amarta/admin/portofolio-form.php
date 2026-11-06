@@ -127,12 +127,12 @@ require __DIR__ . '/includes/atas.php';
             <div class="card">
                 <div class="card-header"><h2 class="card-title fs-6 fw-bold mb-0">Gambar karya <span class="text-danger">*</span></h2></div>
                 <div class="card-body">
-                    <img src="<?= e(urlGambarAdmin($data['gambar'])) ?>" alt="Pratinjau gambar karya" class="img-preview mb-3"
+                    <img src="<?= e(urlGambarAdmin($data['gambar'])) ?>" alt="Pratinjau gambar karya" class="img-preview gambar-utuh mb-3"
                          data-preview-untuk="gambar" width="800" height="600">
                     <label for="gambar" class="form-label fw-semibold"><?= $modeEdit ? 'Ganti gambar' : 'Pilih gambar' ?></label>
                     <input type="file" id="gambar" name="gambar" accept="image/jpeg,image/png,image/webp"
                            class="form-control<?= kelasError($error, 'gambar') ?>"<?= $modeEdit ? '' : ' required' ?>>
-                    <div class="form-text">JPG, PNG, atau WEBP, maksimal 2 MB.<?= $modeEdit ? ' Kosongkan jika tidak ingin mengganti.' : '' ?></div>
+                    <div class="form-text">JPG, PNG, atau WEBP, maksimal <?= UKURAN_MAKS_MB ?> MB.<?= $modeEdit ? ' Kosongkan jika tidak ingin mengganti.' : '' ?></div>
                     <?= pesanError($error, 'gambar') ?>
                 </div>
             </div>

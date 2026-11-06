@@ -37,20 +37,20 @@ $flash       = ambilFlash();
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
     <title>Masuk | Admin <?= e($profilUsaha['nama_usaha']) ?></title>
-    <link rel="icon" href="../assets/img/logo.svg" type="image/svg+xml">
+    <link rel="icon" href="<?= e('../' . urlLogo()) ?>">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" crossorigin="anonymous">
-    <link rel="stylesheet" href="assets/adminlte/adminlte.min.css">
-    <link rel="stylesheet" href="assets/admin.css">
+    <link rel="stylesheet" href="<?= e(urlAset('assets/adminlte/adminlte.min.css', __DIR__)) ?>">
+    <link rel="stylesheet" href="<?= e(urlAset('assets/admin.css', __DIR__)) ?>">
 </head>
 <body class="login-page">
 <main class="login-box">
     <h1 class="login-logo">
         <a href="../index.php" class="d-inline-flex align-items-center gap-2 text-decoration-none">
-            <img src="../assets/img/logo.svg" width="44" height="44" alt="">
+            <img src="<?= e('../' . urlLogo()) ?>" width="44" height="44" alt="">
             <span><b><?= e($profilUsaha['nama_usaha']) ?></b></span>
         </a>
     </h1>
@@ -102,6 +102,6 @@ $flash       = ambilFlash();
     </div>
 </main>
 
-<script src="assets/admin.js"></script>
+<script src="<?= e(urlAset('assets/admin.js', __DIR__)) ?>"></script>
 </body>
 </html>

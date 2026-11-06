@@ -134,7 +134,7 @@ require __DIR__ . '/includes/header.php';
                     <div class="<?= $kelasField('whatsapp') ?>">
                         <label for="whatsapp">Nomor WhatsApp <span class="req" aria-hidden="true">*</span></label>
                         <input id="whatsapp" name="whatsapp" type="tel" inputmode="numeric" autocomplete="tel"
-                               maxlength="15" placeholder="Contoh: 081234567890" required
+                               maxlength="20" placeholder="Contoh: 081234567890" required
                                value="<?= e($isian['whatsapp']) ?>" aria-describedby="whatsapp-hint whatsapp-error"<?= $atributError('whatsapp') ?>>
                         <p class="field-hint" id="whatsapp-hint">Hanya angka, 10–15 digit.</p>
                         <p class="field-error" id="whatsapp-error" data-error-for="whatsapp"><?= e($error['whatsapp'] ?? '') ?></p>
@@ -158,7 +158,7 @@ require __DIR__ . '/includes/header.php';
                     <p class="form-legend"><span class="req" aria-hidden="true">*</span> wajib diisi</p>
 
                     <button type="submit" class="btn btn-primary btn-lg btn-block" data-submit>
-                        <?= ikon('whatsapp') ?> Kirim &amp; Lanjut ke WhatsApp
+                        <?= ikon('whatsapp') ?> Pesan via WhatsApp
                     </button>
 
                     <p class="form-note"><?= ikon('klip') ?> File referensi desain dapat dikirim langsung melalui WhatsApp.</p>
@@ -190,9 +190,10 @@ require __DIR__ . '/includes/header.php';
                        data-kategori-nama="<?= e($karya['nama_kategori']) ?>"
                        data-tanggal="<?= e(formatTanggal($karya['tanggal'])) ?>"
                        data-deskripsi="<?= e($karya['deskripsi']) ?>">
+                        <?php [$lebar, $tinggi] = ukuranGambar($karya['gambar']); ?>
                         <span class="porto-media">
                             <img src="<?= e(urlGambar($karya['gambar'])) ?>" alt="<?= e($karya['judul']) ?>"
-                                 width="800" height="600" loading="lazy">
+                                 width="<?= e($lebar) ?>" height="<?= e($tinggi) ?>" loading="lazy">
                             <span class="porto-zoom" aria-hidden="true"><?= ikon('perbesar') ?></span>
                         </span>
                         <span class="porto-caption">

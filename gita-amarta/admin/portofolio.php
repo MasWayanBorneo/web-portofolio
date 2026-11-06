@@ -74,7 +74,7 @@ require __DIR__ . '/includes/atas.php';
                     <tbody>
                         <?php foreach ($daftarKarya as $karya): ?>
                             <tr>
-                                <td><img src="<?= e(urlGambarAdmin($karya['gambar'])) ?>" alt="" class="thumb" width="64" height="48" loading="lazy"></td>
+                                <td><img src="<?= e(urlGambarAdmin($karya['gambar'])) ?>" alt="" class="thumb gambar-utuh" width="64" height="48" loading="lazy"></td>
                                 <td class="fw-semibold"><?= e($karya['judul']) ?></td>
                                 <td><span class="badge rounded-pill text-bg-light border"><?= e($karya['nama_kategori']) ?></span></td>
                                 <td class="text-nowrap"><?= e(formatTanggal($karya['tanggal'])) ?></td>

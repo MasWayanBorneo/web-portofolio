@@ -62,7 +62,7 @@ require __DIR__ . '/includes/atas.php';
                         <?php foreach ($daftarLayanan as $layanan): ?>
                             <?php $aktif = $layanan['status'] === 'aktif'; ?>
                             <tr>
-                                <td><img src="<?= e(urlGambarAdmin($layanan['gambar'])) ?>" alt="" class="thumb" width="64" height="48" loading="lazy"></td>
+                                <td><img src="<?= e(urlGambarAdmin($layanan['gambar'])) ?>" alt="" class="thumb gambar-utuh" width="64" height="48" loading="lazy"></td>
                                 <td>
                                     <span class="fw-semibold d-block"><?= e($layanan['nama_layanan']) ?></span>
                                     <small class="text-body-secondary"><?= e($layanan['nama_kategori']) ?></small>

@@ -76,6 +76,11 @@
 
 .sidebar-brand .brand-image {
   box-shadow: none;
+  object-fit: contain;
+}
+
+.login-logo img {
+  object-fit: contain;
 }
 
 .sidebar-menu .nav-link {
@@ -410,4 +415,56 @@
 
 .pv-sun {
   color: var(--sun);
+}
+
+/* Halaman hapus kategori: kotak pilihan -------------------------------- */
+.pilihan-hapus {
+  margin-top: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 12px;
+}
+
+.pilihan-hapus--bahaya {
+  border-color: rgba(var(--bs-danger-rgb), 0.35);
+  background: rgba(var(--bs-danger-rgb), 0.04);
+}
+
+/* Halaman Tampilan: pratinjau logo di latar terang & gelap ---------------- */
+.pratinjau-logo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.pratinjau-logo > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 12px;
+  font-weight: 800;
+}
+
+.pratinjau-logo img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.pratinjau-logo .latar-terang {
+  background: #FFF8F0;
+  color: #1A1B3A;
+  border: 1px solid var(--bs-border-color);
+}
+
+.pratinjau-logo .latar-gelap {
+  background: #1A1B3A;
+  color: #fff;
+}
+
+/* Gambar karya portofolio & sampul layanan ditampilkan utuh (tidak dipotong), sama seperti di website. */
+.gambar-utuh {
+  object-fit: contain;
+  background: var(--bs-secondary-bg);
 }

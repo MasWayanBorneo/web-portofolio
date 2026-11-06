@@ -1,8 +1,13 @@
 <?php
 /**
- * Pengaturan tema & warna website publik.
+ * Pengaturan tampilan website publik: tema & warna, serta logo.
  * Admin memilih tema bawaan, atau "Kustom" lalu mengatur 5 warna sendiri.
  * Warna yang membuat teks sulit dibaca (di bawah standar WCAG AA) ditolak.
+ *
+ * Halaman ini punya 3 aksi POST (field "aksi"):
+ *   tema        → simpan tema & warna (bawaan jika field aksi tidak ada)
+ *   logo        → unggah logo baru
+ *   logo_bawaan → kembali ke logo bawaan (logo.svg)
  */
 
 require_once __DIR__ . '/includes/auth.php';
@@ -11,9 +16,37 @@ $admin      = wajibLogin();
 $lama       = getTampilan();
 $daftarTema = daftarTema();
 $error      = [];
+$errorLogo  = null;
 $data       = $lama;
+$aksi       = ambilTeks($_POST, 'aksi');
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $aksi === 'logo') {
+    cekCsrf();
+
+    $unggah = unggahGambar($_FILES['logo'] ?? null);
+
+    if ($unggah['error'] !== null) {
+        $errorLogo = $unggah['error'];
+    } elseif ($unggah['nama'] === null) {
+        $errorLogo = 'Pilih file logo terlebih dahulu.';
+    } else {
+        simpanLogo((int) $lama['id_tampilan'], $unggah['nama']);
+        hapusGambarJikaTidakDipakai($lama['logo']);
+        setFlash('success', 'Logo baru sudah dipakai di website dan panel admin.');
+        redirect('tampilan.php#bagian-logo');
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $aksi === 'logo_bawaan') {
+    cekCsrf();
+
+    simpanLogo((int) $lama['id_tampilan'], null);
+    hapusGambarJikaTidakDipakai($lama['logo']);
+    setFlash('success', 'Logo dikembalikan ke logo bawaan.');
+    redirect('tampilan.php#bagian-logo');
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !in_array($aksi, ['logo', 'logo_bawaan'], true)) {
     cekCsrf();
 
     $input = ambilInputTampilan($_POST);
@@ -67,6 +100,7 @@ require __DIR__ . '/includes/atas.php';
 
 <form action="tampilan.php" method="post" data-form-tema>
     <?= inputCsrf() ?>
+    <input type="hidden" name="aksi" value="tema">
 
     <div class="row g-4">
         <div class="col-xl-7">
@@ -188,5 +222,66 @@ require __DIR__ . '/includes/atas.php';
         <a href="../index.php" class="btn btn-link ms-auto" target="_blank" rel="noopener">Lihat website <i class="bi bi-box-arrow-up-right"></i></a>
     </div>
 </form>
+
+<!-- ================= LOGO (form terpisah karena memakai upload file) ================= -->
+<?php $pakaiLogoBawaan = urlLogo() === 'assets/img/' . LOGO_BAWAAN; ?>
+<div class="card mt-5" id="bagian-logo">
+    <div class="card-header d-flex align-items-center">
+        <h2 class="card-title fs-6 fw-bold mb-0">3. Logo website</h2>
+        <span class="badge ms-auto <?= $pakaiLogoBawaan ? 'text-bg-secondary' : 'text-bg-primary' ?>">
+            <?= $pakaiLogoBawaan ? 'Logo bawaan' : 'Logo unggahan' ?>
+        </span>
+    </div>
+    <div class="card-body">
+        <?php if ($errorLogo !== null): ?>
+            <div class="alert alert-danger py-2" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i> <?= e($errorLogo) ?>
+            </div>
+        <?php endif; ?>
+
+        <div class="row g-4 align-items-start">
+            <div class="col-lg-6">
+                <p class="small text-body-secondary mb-2">Pratinjau di navbar (latar terang) dan footer (latar gelap):</p>
+                <div class="pratinjau-logo" aria-hidden="true">
+                    <div class="latar-terang">
+                        <img src="<?= e('../' . urlLogo()) ?>" alt="" width="40" height="40" data-preview-untuk="logo">
+                        <span><?= e($profilUsaha['nama_usaha']) ?></span>
+                    </div>
+                    <div class="latar-gelap">
+                        <img src="<?= e('../' . urlLogo()) ?>" alt="" width="40" height="40" data-preview-untuk="logo">
+                        <span><?= e($profilUsaha['nama_usaha']) ?></span>
+                    </div>
+                </div>
+                <p class="small text-body-secondary mt-2 mb-0">Logo juga dipakai sebagai ikon di tab browser (favicon) dan di panel admin.</p>
+            </div>
+
+            <div class="col-lg-6">
+                <form action="tampilan.php" method="post" enctype="multipart/form-data">
+                    <?= inputCsrf() ?>
+                    <input type="hidden" name="aksi" value="logo">
+                    <label for="logo" class="form-label fw-semibold">Unggah logo baru</label>
+                    <input type="file" id="logo" name="logo" accept="image/png,image/webp,image/jpeg" required
+                           class="form-control<?= $errorLogo !== null ? ' is-invalid' : '' ?>">
+                    <div class="form-text">
+                        PNG atau WEBP dengan <strong>latar transparan</strong> dan bentuk <strong>persegi</strong>
+                        (misalnya 512×512 px), maksimal <?= UKURAN_MAKS_MB ?> MB. JPG bisa, tapi latarnya tidak transparan.
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-3"><i class="bi bi-upload"></i> Pakai logo ini</button>
+                </form>
+
+                <?php if (!$pakaiLogoBawaan): ?>
+                    <form action="tampilan.php" method="post" class="mt-3"
+                          data-konfirmasi="Kembalikan ke logo bawaan? Logo unggahan saat ini akan dihapus.">
+                        <?= inputCsrf() ?>
+                        <input type="hidden" name="aksi" value="logo_bawaan">
+                        <button type="submit" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-arrow-counterclockwise"></i> Kembalikan ke logo bawaan
+                        </button>
+                    </form>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+</div>
 
 <?php require __DIR__ . '/includes/bawah.php'; ?>

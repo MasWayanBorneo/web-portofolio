@@ -79,7 +79,7 @@ require __DIR__ . '/includes/atas.php';
                     <label for="foto" class="form-label fw-semibold">Ganti foto <span class="text-body-secondary fw-normal">(opsional)</span></label>
                     <input type="file" id="foto" name="foto" accept="image/jpeg,image/png,image/webp"
                            class="form-control<?= kelasError($error, 'foto') ?>">
-                    <div class="form-text">JPG, PNG, atau WEBP, maksimal 2 MB. Pakai foto <strong>potret</strong> (tegak, rasio 5:6). Bagian tepi akan dipotong otomatis.</div>
+                    <div class="form-text">JPG, PNG, atau WEBP, maksimal <?= UKURAN_MAKS_MB ?> MB. Pakai foto <strong>potret</strong> (tegak, rasio 5:6). Bagian tepi akan dipotong otomatis.</div>
                     <?= pesanError($error, 'foto') ?>
                 </div>
             </div>

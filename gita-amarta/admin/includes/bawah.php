@@ -17,7 +17,7 @@
 
 <!-- Bootstrap 5 (bundle sudah termasuk Popper untuk dropdown) lalu AdminLTE -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-<script src="assets/adminlte/adminlte.min.js"></script>
-<script src="assets/admin.js"></script>
+<script src="<?= e(urlAset('assets/adminlte/adminlte.min.js', __DIR__ . '/..')) ?>"></script>
+<script src="<?= e(urlAset('assets/admin.js', __DIR__ . '/..')) ?>"></script>
 </body>
 </html>

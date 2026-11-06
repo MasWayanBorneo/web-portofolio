@@ -124,13 +124,13 @@ require __DIR__ . '/includes/atas.php';
                     <div class="row g-3">
                         <div class="col-sm-6">
                             <label for="harga_min" class="form-label fw-semibold">Harga minimal (Rp) <span class="text-danger">*</span></label>
-                            <input type="number" id="harga_min" name="harga_min" min="0" step="1000" required inputmode="numeric"
+                            <input type="number" id="harga_min" name="harga_min" min="0" step="1" required inputmode="numeric"
                                    class="form-control<?= kelasError($error, 'harga_min') ?>" value="<?= e($data['harga_min']) ?>">
                             <?= pesanError($error, 'harga_min') ?>
                         </div>
                         <div class="col-sm-6">
                             <label for="harga_max" class="form-label fw-semibold">Harga maksimal (Rp) <span class="text-danger">*</span></label>
-                            <input type="number" id="harga_max" name="harga_max" min="0" step="1000" required inputmode="numeric"
+                            <input type="number" id="harga_max" name="harga_max" min="0" step="1" required inputmode="numeric"
                                    class="form-control<?= kelasError($error, 'harga_max') ?>" value="<?= e($data['harga_max']) ?>">
                             <?= pesanError($error, 'harga_max') ?>
                         </div>
@@ -168,12 +168,12 @@ require __DIR__ . '/includes/atas.php';
             <div class="card">
                 <div class="card-header"><h2 class="card-title fs-6 fw-bold mb-0">Gambar sampul</h2></div>
                 <div class="card-body">
-                    <img src="<?= e(urlGambarAdmin($data['gambar'])) ?>" alt="Pratinjau gambar sampul" class="img-preview mb-3"
+                    <img src="<?= e(urlGambarAdmin($data['gambar'])) ?>" alt="Pratinjau gambar sampul" class="img-preview gambar-utuh mb-3"
                          data-preview-untuk="gambar" width="800" height="600">
                     <label for="gambar" class="form-label fw-semibold"><?= $modeEdit ? 'Ganti gambar' : 'Pilih gambar' ?> <span class="text-body-secondary fw-normal">(opsional)</span></label>
                     <input type="file" id="gambar" name="gambar" accept="image/jpeg,image/png,image/webp"
                            class="form-control<?= kelasError($error, 'gambar') ?>">
-                    <div class="form-text">JPG, PNG, atau WEBP, maksimal 2 MB. Rasio 4:3 paling pas.</div>
+                    <div class="form-text">JPG, PNG, atau WEBP, maksimal <?= UKURAN_MAKS_MB ?> MB. Rasio 4:3 paling pas.</div>
                     <?= pesanError($error, 'gambar') ?>
                 </div>
             </div>

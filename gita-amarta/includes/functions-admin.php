@@ -9,8 +9,11 @@
 
 require_once __DIR__ . '/functions.php';
 
-/** Batas ukuran file gambar yang diunggah: 2 MB. */
-const UKURAN_MAKS_GAMBAR = 2 * 1024 * 1024;
+/** Batas ukuran file gambar yang diunggah (dalam MB). Ubah angka ini saja jika batasnya ingin diganti. */
+const UKURAN_MAKS_MB = 2;
+
+/** Batas yang sama dalam byte: 2 MB = 2.097.152 byte. */
+const UKURAN_MAKS_GAMBAR = UKURAN_MAKS_MB * 1024 * 1024;
 
 /** Tipe gambar yang boleh diunggah (MIME => ekstensi). SVG sengaja tidak diizinkan karena bisa berisi script. */
 const TIPE_GAMBAR_DIIZINKAN = [
@@ -272,20 +275,91 @@ function hapusKategori(int $idKategori): void
     $stmt->execute([':id' => $idKategori]);
 }
 
+/**
+ * Memindahkan semua layanan & karya ke kategori lain, lalu menghapus kategori lama.
+ * Dijalankan dalam satu transaksi: jika satu langkah gagal, semuanya dibatalkan.
+ */
+function pindahkanIsiLaluHapusKategori(int $idKategori, int $idTujuan): void
+{
+    $pdo = getKoneksi();
+    $pdo->beginTransaction();
+
+    try {
+        $parameter = [':tujuan' => $idTujuan, ':asal' => $idKategori];
+
+        $pdo->prepare('UPDATE layanan SET id_kategori = :tujuan WHERE id_kategori = :asal')->execute($parameter);
+        $pdo->prepare('UPDATE portofolio SET id_kategori = :tujuan WHERE id_kategori = :asal')->execute($parameter);
+        hapusKategori($idKategori);
+
+        $pdo->commit();
+    } catch (Throwable $e) {
+        $pdo->rollBack();
+        throw $e;
+    }
+}
+
+/**
+ * Menghapus kategori BESERTA semua layanan dan karya di dalamnya (tidak bisa dibatalkan).
+ * File gambar hasil unggahan ikut dihapus setelah datanya terhapus.
+ */
+function hapusKategoriBesertaIsi(int $idKategori): void
+{
+    $pdo = getKoneksi();
+
+    // Catat nama file gambar lebih dulu, karena barisnya akan hilang.
+    $stmt = $pdo->prepare(
+        'SELECT gambar FROM layanan WHERE id_kategori = :id1 AND gambar IS NOT NULL
+         UNION
+         SELECT gambar FROM portofolio WHERE id_kategori = :id2'
+    );
+    $stmt->execute([':id1' => $idKategori, ':id2' => $idKategori]);
+    $daftarGambar = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+    $pdo->beginTransaction();
+
+    try {
+        $parameter = [':id' => $idKategori];
+
+        $pdo->prepare('DELETE FROM portofolio WHERE id_kategori = :id')->execute($parameter);
+        $pdo->prepare('DELETE FROM layanan WHERE id_kategori = :id')->execute($parameter);
+        hapusKategori($idKategori);
+
+        $pdo->commit();
+    } catch (Throwable $e) {
+        $pdo->rollBack();
+        throw $e;
+    }
+
+    // File dihapus SETELAH commit, agar jika database gagal, gambarnya masih ada.
+    foreach ($daftarGambar as $namaFile) {
+        hapusGambarJikaTidakDipakai($namaFile);
+    }
+}
+
 /* =====================================================================
  * 5. QUERY: LAYANAN (admin melihat semua status)
  * ===================================================================== */
 
-function getSemuaLayananAdmin(): array
+/**
+ * Semua layanan (aktif & nonaktif). Jika $idKategori diisi, hanya layanan kategori tersebut.
+ */
+function getSemuaLayananAdmin(?int $idKategori = null): array
 {
-    $stmt = getKoneksi()->prepare(
-        'SELECT l.id_layanan, l.id_kategori, l.nama_layanan, l.harga_min, l.harga_max,
-                l.estimasi_hari, l.gambar, l.status, k.nama_kategori
-         FROM layanan l
-         JOIN kategori k ON k.id_kategori = l.id_kategori
-         ORDER BY l.id_layanan DESC'
-    );
-    $stmt->execute();
+    $sql = 'SELECT l.id_layanan, l.id_kategori, l.nama_layanan, l.harga_min, l.harga_max,
+                   l.estimasi_hari, l.gambar, l.status, k.nama_kategori
+            FROM layanan l
+            JOIN kategori k ON k.id_kategori = l.id_kategori';
+    $parameter = [];
+
+    if ($idKategori !== null) {
+        $sql .= ' WHERE l.id_kategori = :id_kategori';
+        $parameter[':id_kategori'] = $idKategori;
+    }
+
+    $sql .= ' ORDER BY l.id_layanan DESC';
+
+    $stmt = getKoneksi()->prepare($sql);
+    $stmt->execute($parameter);
 
     return $stmt->fetchAll();
 }
@@ -783,6 +857,33 @@ function simpanTampilan(int $idTampilan, array $data): void
     $stmt->execute($parameter);
 }
 
+/**
+ * Menyimpan logo website. $logo = null berarti kembali ke logo bawaan (logo.svg).
+ * Jika tabel tampilan masih kosong, baris baru dibuat dengan warna tema bawaan.
+ */
+function simpanLogo(int $idTampilan, ?string $logo): void
+{
+    if ($idTampilan > 0) {
+        $stmt = getKoneksi()->prepare('UPDATE tampilan SET logo = :logo WHERE id_tampilan = :id');
+        $stmt->execute([':logo' => $logo, ':id' => $idTampilan]);
+        return;
+    }
+
+    $bawaan = daftarTema()['ungu-koral'];
+    $stmt = getKoneksi()->prepare(
+        'INSERT INTO tampilan (tema, warna_utama, warna_aksen, warna_sorot, warna_latar, warna_teks, logo)
+         VALUES (\'ungu-koral\', :utama, :aksen, :sorot, :latar, :teks, :logo)'
+    );
+    $stmt->execute([
+        ':utama' => $bawaan['warna_utama'],
+        ':aksen' => $bawaan['warna_aksen'],
+        ':sorot' => $bawaan['warna_sorot'],
+        ':latar' => $bawaan['warna_latar'],
+        ':teks'  => $bawaan['warna_teks'],
+        ':logo'  => $logo,
+    ]);
+}
+
 /* =====================================================================
  * 10. UNGGAH & HAPUS GAMBAR
  * ===================================================================== */
@@ -803,14 +904,14 @@ function unggahGambar(?array $file): array
 
     if (is_array($file['error']) || $file['error'] !== UPLOAD_ERR_OK) {
         $pesan = in_array($file['error'], [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true)
-            ? 'Ukuran gambar maksimal 2 MB.'
+            ? 'Ukuran gambar maksimal ' . UKURAN_MAKS_MB . ' MB.'
             : 'Gambar gagal diunggah. Coba lagi.';
 
         return ['nama' => null, 'error' => $pesan];
     }
 
     if ($file['size'] > UKURAN_MAKS_GAMBAR) {
-        return ['nama' => null, 'error' => 'Ukuran gambar maksimal 2 MB.'];
+        return ['nama' => null, 'error' => 'Ukuran gambar maksimal ' . UKURAN_MAKS_MB . ' MB.'];
     }
 
     // Tipe file dicek dari ISI file (bukan dari nama/ekstensi yang bisa dipalsukan).
@@ -830,16 +931,17 @@ function unggahGambar(?array $file): array
 }
 
 /**
- * Berapa baris (layanan + portofolio + desainer) yang masih memakai file gambar ini.
+ * Berapa baris (layanan + portofolio + desainer + logo) yang masih memakai file gambar ini.
  */
 function hitungPemakaianGambar(string $namaFile): int
 {
     $stmt = getKoneksi()->prepare(
         'SELECT (SELECT COUNT(*) FROM layanan WHERE gambar = :g1)
               + (SELECT COUNT(*) FROM portofolio WHERE gambar = :g2)
-              + (SELECT COUNT(*) FROM desainer WHERE foto = :g3)'
+              + (SELECT COUNT(*) FROM desainer WHERE foto = :g3)
+              + (SELECT COUNT(*) FROM tampilan WHERE logo = :g4)'
     );
-    $stmt->execute([':g1' => $namaFile, ':g2' => $namaFile, ':g3' => $namaFile]);
+    $stmt->execute([':g1' => $namaFile, ':g2' => $namaFile, ':g3' => $namaFile, ':g4' => $namaFile]);
 
     return (int) $stmt->fetchColumn();
 }
