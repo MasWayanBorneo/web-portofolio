@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600" role="img" aria-label="Poster Bazar UMKM">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFB088"/><stop offset="1" stop-color="#FF7A59"/></linearGradient></defs>
+<rect width="800" height="600" fill="url(#bg)"/>
+<circle cx="700" cy="90" r="160" fill="#fff" opacity=".10"/>
+<circle cx="80" cy="560" r="200" fill="#fff" opacity=".08"/>
+<g transform="rotate(-5 400 300)">
+<rect x="258" y="82" width="300" height="436" rx="14" fill="#000" opacity=".18"/>
+<rect x="248" y="70" width="300" height="436" rx="14" fill="#FFF8F0"/>
+<circle cx="470" cy="170" r="70" fill="#2A9D8F"/><rect x="290" y="120" width="110" height="110" rx="20" fill="#7A2E12" opacity=".9"/>
+<path d="M280 260 L360 200 L430 250 L520 190 L520 270 L280 270z" fill="#7A2E12" opacity=".25"/>
+<text x="398" y="330" font-family="'Plus Jakarta Sans','Segoe UI',Arial,sans-serif" font-size="36" font-weight="800" fill="#7A2E12" text-anchor="middle" >BAZAR</text>
+<text x="398" y="372" font-family="'Plus Jakarta Sans','Segoe UI',Arial,sans-serif" font-size="36" font-weight="800" fill="#7A2E12" text-anchor="middle" >UMKM</text>
+<text x="398" y="408" font-family="'Plus Jakarta Sans','Segoe UI',Arial,sans-serif" font-size="16" font-weight="800" fill="#7A2E12" text-anchor="middle" opacity=".75">Produk lokal pilihan</text>
+<rect x="318" y="438" width="160" height="40" rx="20" fill="#7A2E12"/>
+<text x="398" y="464" font-family="'Plus Jakarta Sans','Segoe UI',Arial,sans-serif" font-size="16" font-weight="800" fill="#FFF8F0" text-anchor="middle" >3-5 MEI 2026</text>
+</g>
+</svg>

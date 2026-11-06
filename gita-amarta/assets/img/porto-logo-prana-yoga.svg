@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600" role="img" aria-label="Logo Prana Yoga Studio">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#B8E3D4"/><stop offset="1" stop-color="#7CC6B0"/></linearGradient></defs>
+<rect width="800" height="600" fill="url(#bg)"/>
+<circle cx="700" cy="90" r="160" fill="#fff" opacity=".10"/>
+<circle cx="80" cy="560" r="200" fill="#fff" opacity=".08"/>
+<circle cx="400" cy="230" r="112" fill="#fff" opacity=".9"/>
+<ellipse cx="400" cy="220" rx="30" ry="72" fill="#1F4D45"/><ellipse cx="400" cy="232" rx="28" ry="66" fill="#F28C6B" transform="rotate(-42 400 290)"/><ellipse cx="400" cy="232" rx="28" ry="66" fill="#F28C6B" transform="rotate(42 400 290)"/>
+<rect x="340" y="296" width="120" height="10" rx="5" fill="#1F4D45"/>
+<text x="400" y="430" font-family="'Plus Jakarta Sans','Segoe UI',Arial,sans-serif" font-size="50" font-weight="800" fill="#1F4D45" text-anchor="middle" letter-spacing="-1">Prana Yoga</text>
+<text x="400" y="474" font-family="'Plus Jakarta Sans','Segoe UI',Arial,sans-serif" font-size="18" font-weight="800" fill="#1F4D45" text-anchor="middle" letter-spacing="6" opacity=".85">STUDIO</text>
+</svg>
