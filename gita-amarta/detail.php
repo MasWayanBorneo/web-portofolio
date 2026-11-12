@@ -48,7 +48,7 @@ $contohKarya = getPortofolioByKategori((int) $layanan['id_kategori'], 4);
 // Error & isian lama dari pesan.php (jika validasi server gagal).
 $flash  = ambilFlashPesanan((int) $layanan['id_layanan']);
 $error  = $flash['error'];
-$isian  = array_merge(['nama' => '', 'whatsapp' => '', 'kebutuhan' => '', 'tenggat' => ''], $flash['isian']);
+$isian  = array_merge(['nama' => '', 'kebutuhan' => '', 'tenggat' => ''], $flash['isian']);
 $hariIni = date('Y-m-d');
 
 /** Atribut tambahan untuk kolom yang error (aria-invalid). */
@@ -129,15 +129,6 @@ require __DIR__ . '/includes/header.php';
                         <input id="nama" name="nama" type="text" autocomplete="name" maxlength="100" required
                                value="<?= e($isian['nama']) ?>" aria-describedby="nama-error"<?= $atributError('nama') ?>>
                         <p class="field-error" id="nama-error" data-error-for="nama"><?= e($error['nama'] ?? '') ?></p>
-                    </div>
-
-                    <div class="<?= $kelasField('whatsapp') ?>">
-                        <label for="whatsapp">Nomor WhatsApp <span class="req" aria-hidden="true">*</span></label>
-                        <input id="whatsapp" name="whatsapp" type="tel" inputmode="numeric" autocomplete="tel"
-                               maxlength="20" placeholder="Contoh: 081234567890" required
-                               value="<?= e($isian['whatsapp']) ?>" aria-describedby="whatsapp-hint whatsapp-error"<?= $atributError('whatsapp') ?>>
-                        <p class="field-hint" id="whatsapp-hint">Hanya angka, 10–15 digit.</p>
-                        <p class="field-error" id="whatsapp-error" data-error-for="whatsapp"><?= e($error['whatsapp'] ?? '') ?></p>
                     </div>
 
                     <div class="<?= $kelasField('kebutuhan') ?>">

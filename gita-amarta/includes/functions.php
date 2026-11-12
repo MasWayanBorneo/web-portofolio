@@ -442,7 +442,6 @@ function ambilInputPesanan(array $post): array
     return [
         'id_layanan' => is_int($idLayanan) ? $idLayanan : null,
         'nama'       => $teks('nama'),
-        'whatsapp'   => $teks('whatsapp'),
         'kebutuhan'  => $teks('kebutuhan'),
         'tenggat'    => $teks('tenggat'),
     ];
@@ -461,15 +460,6 @@ function validasiPesanan(array $data): array
         $error['nama'] = 'Nama lengkap wajib diisi.';
     } elseif (mb_strlen($data['nama']) > 100) {
         $error['nama'] = 'Nama lengkap maksimal 100 karakter.';
-    }
-
-    // Nomor WhatsApp: wajib, hanya angka, 10–15 digit.
-    if ($data['whatsapp'] === '') {
-        $error['whatsapp'] = 'Nomor WhatsApp wajib diisi.';
-    } elseif (!preg_match('/^[0-9]+$/', $data['whatsapp'])) {
-        $error['whatsapp'] = 'Nomor WhatsApp hanya boleh berisi angka (tanpa huruf, spasi, atau tanda +).';
-    } elseif (strlen($data['whatsapp']) < 10 || strlen($data['whatsapp']) > 15) {
-        $error['whatsapp'] = 'Nomor WhatsApp harus terdiri dari 10–15 digit.';
     }
 
     // Deskripsi kebutuhan: wajib.
@@ -505,7 +495,6 @@ function susunPesanWhatsApp(array $layanan, array $data): string
         '',
         '*Layanan:* ' . $layanan['nama_layanan'],
         '*Nama:* ' . $data['nama'],
-        '*No. WhatsApp:* ' . $data['whatsapp'],
         '*Kebutuhan:*',
         $data['kebutuhan'],
         '*Tenggat:* ' . $tenggat,
