@@ -42,7 +42,6 @@ $error = validasiPesanan($input);
 if ($error) {
     simpanFlashPesanan((int) $layanan['id_layanan'], $error, [
         'nama'      => $input['nama'],
-        'whatsapp'  => $input['whatsapp'],
         'kebutuhan' => $input['kebutuhan'],
         'tenggat'   => $input['tenggat'],
     ]);

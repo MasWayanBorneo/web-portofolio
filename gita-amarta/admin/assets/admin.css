@@ -433,8 +433,14 @@
 /* Halaman Tampilan: pratinjau logo di latar terang & gelap ---------------- */
 .pratinjau-logo {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  /* Dua kolom jika muat, otomatis jadi satu kolom di layar sempit (HP 320px). */
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 12px;
+}
+
+.pratinjau-logo span {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .pratinjau-logo > div {

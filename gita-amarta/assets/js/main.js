@@ -384,12 +384,6 @@
       if (v.length > 100) return 'Nama lengkap maksimal 100 karakter.';
       return '';
     },
-    whatsapp: function (v) {
-      if (v === '') return 'Nomor WhatsApp wajib diisi.';
-      if (!/^[0-9]+$/.test(v)) return 'Nomor WhatsApp hanya boleh berisi angka (tanpa huruf, spasi, atau tanda +).';
-      if (v.length < 10 || v.length > 15) return 'Nomor WhatsApp harus terdiri dari 10–15 digit.';
-      return '';
-    },
     kebutuhan: function (v) {
       if (v === '') return 'Deskripsi kebutuhan wajib diisi.';
       if (v.length > 1000) return 'Deskripsi kebutuhan maksimal 1000 karakter.';

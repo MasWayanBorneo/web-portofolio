@@ -188,7 +188,7 @@ require __DIR__ . '/includes/header.php';
             <li class="step reveal">
                 <span class="step-num step-num--2" aria-hidden="true">2</span>
                 <h3>Isi formulir</h3>
-                <p>Tulis nama, nomor WhatsApp, kebutuhan desain, dan tenggat waktu jika ada.</p>
+                <p>Tulis nama, kebutuhan desain, dan tenggat waktu jika ada.</p>
             </li>
             <li class="step reveal">
                 <span class="step-num step-num--3" aria-hidden="true">3</span>
